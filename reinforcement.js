@@ -494,7 +494,7 @@
   }
 
   function drawScene(){
-    ctx.fillStyle = '#2d5016';
+    ctx.fillStyle = '#7bcc5a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Fixed overhead camera showing entire track

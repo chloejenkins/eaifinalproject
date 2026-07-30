@@ -36,17 +36,17 @@
   const ICON_SCALE = 0.42;
 
   const STEPS = [
-    { title:"Input: Unlabeled Images",
-      desc:"The model is given a large collection of car images. No labels, just raw pixels." },
-    { title:"Random Initialization",
-      desc:"The model starts with random filters — it doesn't know anything yet." },
-    { title:"Learning Low-Level Features",
-      desc:"Filters adjust to catch simple patterns that occur often: edges, lines, curves, textures." },
-    { title:"Learning Higher-Level Features",
-      desc:"Low-level features combine into recognizable parts: wheels, headlights, grilles, whole cars." },
-    { title:"Discovering Structure (Clustering)",
+    { title:"Step 1",
+      desc:"The model is given a large collection of car images. The data is fed in with no labels." },
+    { title:"Step 2",
+      desc:"Initially, the model randomly groups the cars. The model has to begin somewhere to find its bearings." },
+    { title:"Step 3",
+      desc:"The model learns patterns in the data, but these patterns don't have to match what humans find important. It discovers features useful for grouping, whether or not those features make intuitive sense to us." },
+    { title:"Step 4",
+      desc:"In this case, the model discovered wheels, headlights, and grilles—features humans recognize. But the model didn't have to find these. It could just as easily have grouped cars by paint reflections or other patterns invisible to human intuition." },
+    { title:"Step 5",
       desc:"The model groups similar cars together, based only on the features it has learned." },
-    { title:"Result: The Model Understands Patterns",
+    { title:"Step 6",
       desc:"With no labels at all, the model can now recognize structure in car images." },
   ];
 
