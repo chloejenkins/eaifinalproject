@@ -4,7 +4,7 @@
     {
       "name": "AI Driving Academy",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server"],
+      "runtimeArgs": ["http-server", "-c-1"],
       "port": 8080,
       "autoPort": true
     }

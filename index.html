@@ -262,7 +262,7 @@ select:focus, .text-input:focus, input[type=text]:focus{
   border-color:var(--accent);
   box-shadow:0 0 0 3px rgba(74,144,226,0.1);
 }
-.hint{ color:var(--text-dim); font-size:13px; margin-top:8px; line-height:1.5; }
+.hint{ color:var(--text); font-size:13px; margin-top:4px; margin-bottom:8px; line-height:1.5; opacity:0.7; }
 
 /* stat row */
 .stats{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
@@ -381,14 +381,10 @@ footer.hint-footer{ color:var(--text-faint); font-size:11.5px; margin-top:18px; 
 
     <div class="subtabs">
       <div class="subtab active" data-sub="imitation">Imitation Driving</div>
-      <div class="subtab" data-sub="classification">Car Classification</div>
     </div>
 
     <!-- SUB 1: IMITATION -->
     <div class="subpanel active" id="sub-imitation"></div>
-
-    <!-- SUB 2: CLASSIFICATION -->
-    <div class="subpanel" id="sub-classification"></div>
   </section>
 
   <!-- ============================================================ -->
@@ -436,7 +432,6 @@ subtabs.forEach(s=>{
 
 <script src="unsupervised.js" onerror="console.warn('unsupervised.js failed to load')"></script>
 <script src="imitation.js" onerror="console.warn('imitation.js failed to load')"></script>
-<script src="classification.js" onerror="console.warn('classification.js failed to load')"></script>
 
 <script>
 // Reinforcement Learning Module - Inlined for compatibility
@@ -502,10 +497,12 @@ try {
         <div id="trainControls" style="display:none;">
           <div class="field">
             <label>Episodes <span class="val" id="episodesVal">500</span></label>
+            <p class="hint">How many times the car will drive around the track to learn.</p>
             <input type="range" id="episodesSlider" min="20" max="3000" step="20" value="500">
           </div>
           <div class="field">
             <label>Epsilon decay</label>
+            <p class="hint">How epsilon (exploration rate) changes during training.</p>
             <select id="decayTypeSelect">
               <option value="none">None (constant)</option>
               <option value="linear" selected>Linear</option>
@@ -514,6 +511,7 @@ try {
           </div>
           <div class="field">
             <label>Training speed</label>
+            <p class="hint">How many training steps to run per frame (higher = faster training).</p>
             <select id="speedSelect">
               <option value="1">1× (real time)</option>
               <option value="5" selected>5×</option>
@@ -523,6 +521,7 @@ try {
           </div>
           <div class="field">
             <label>Car speed <span class="val" id="carSpeedVal">3.0</span></label>
+            <p class="hint">How fast the car moves around the track during training.</p>
             <input type="range" id="carSpeedSlider" min="1.5" max="5" step="0.1" value="3">
           </div>
         </div>
@@ -820,11 +819,11 @@ try {
   function drawScene(){
     ctx.fillStyle = '#2d5016';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    const zoom = 1.2;
     ctx.save();
+    const scale = Math.min(canvas.width / 620, canvas.height / 420);
     ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.scale(zoom, zoom);
-    ctx.translate(-car.x, -car.y);
+    ctx.scale(scale, scale);
+    ctx.translate(-CX, -CY);
     drawTrack(track);
     // ALWAYS update countdown display
     if(countdownDisplay.style.display !== 'none'){
@@ -989,6 +988,16 @@ try {
   console.error('RL Script error:', e);
   document.getElementById('rl-root').innerHTML = '<div style="color:red;">Error initializing: ' + e.message + '</div>';
 }
+</script>
+<script>
+// Cleanup: Remove classification tab (cached in browsers despite being removed from HTML)
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.subtab').forEach(el => {
+    if (el.dataset.sub === 'classification') el.remove();
+  });
+  const classPanel = document.getElementById('sub-classification');
+  if (classPanel) classPanel.remove();
+});
 </script>
 </body>
 </html>

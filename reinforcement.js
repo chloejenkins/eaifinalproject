@@ -55,14 +55,17 @@
         <div id="trainControls" style="display:none;">
           <div class="field">
             <label>Episodes <span class="val" id="episodesVal">500</span></label>
+            <p class="hint">How many times the car will drive around the track to learn.</p>
             <input type="range" id="episodesSlider" min="20" max="3000" step="20" value="500">
           </div>
           <div class="field">
             <label>Epsilon start <span class="val" id="epsStartVal">1.00</span></label>
+            <p class="hint">Initial chance to try random actions instead of best-known moves.</p>
             <input type="range" id="epsStartSlider" min="0" max="1" step="0.01" value="1">
           </div>
           <div class="field">
             <label>Epsilon min <span class="val" id="epsMinVal">0.05</span></label>
+            <p class="hint">Lowest chance of trying random actions near the end of training.</p>
             <input type="range" id="epsMinSlider" min="0" max="1" step="0.01" value="0.05">
           </div>
           <div class="field">
@@ -75,6 +78,7 @@
           </div>
           <div class="field" id="decayRateField" style="display:none;">
             <label>Decay rate <span class="val" id="decayRateVal">0.010</span></label>
+            <p class="hint">How quickly the car shifts from exploring to exploiting learned knowledge.</p>
             <input type="range" id="decayRateSlider" min="0.001" max="0.05" step="0.001" value="0.01">
           </div>
           <div class="field">
@@ -88,10 +92,12 @@
           </div>
           <div class="field">
             <label>Car speed <span class="val" id="carSpeedVal">3.0</span></label>
+            <p class="hint">How fast the car moves around the track during training.</p>
             <input type="range" id="carSpeedSlider" min="1.5" max="5" step="0.1" value="3">
           </div>
           <div class="field">
             <label>Turn rate <span class="val" id="turnRateVal">0.090</span></label>
+            <p class="hint">How sharply the car turns when steering.</p>
             <input type="range" id="turnRateSlider" min="0.03" max="0.15" step="0.005" value="0.09">
           </div>
           <div class="field" style="display:flex;align-items:center;gap:8px;">
@@ -491,12 +497,12 @@
     ctx.fillStyle = '#2d5016';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Center camera on car with follow-cam effect
-    const zoom = 1.2;
+    // Fixed overhead camera showing entire track
     ctx.save();
+    const scale = Math.min(canvas.width / 620, canvas.height / 420);
     ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.scale(zoom, zoom);
-    ctx.translate(-car.x, -car.y);
+    ctx.scale(scale, scale);
+    ctx.translate(-CX, -CY);
 
     drawTrack(track);
 

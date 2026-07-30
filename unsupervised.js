@@ -19,6 +19,13 @@
           <button id="playBtn" style="font-family:var(--mono); background:var(--accent); border:none; color:#ffffff; padding:10px 20px; border-radius:var(--radius); font-size:13px; cursor:pointer; transition:all .2s ease; font-weight:500; min-width:90px;">▶ Play</button>
           <button id="nextBtn" style="font-family:var(--mono); background:var(--bg-inset); border:1px solid var(--border); color:var(--text-dim); padding:10px 16px; border-radius:var(--radius); font-size:13px; cursor:pointer; transition:all .2s ease; font-weight:500;">Next ▶</button>
         </div>
+
+        <details style="margin-top:24px; padding:16px; background:var(--bg-inset); border-radius:var(--radius); cursor:pointer;">
+          <summary style="font-weight:600; color:var(--text); font-size:14px; cursor:pointer;">Further Reading: Unsupervised Learning</summary>
+          <p style="margin-top:12px; color:var(--text); font-size:13px; line-height:1.6;">
+            Unsupervised learning requires huge data sets and lots of time. The idea is for AI to learn to recognize patterns independently, without any human guidance at all – this can be both insightful and inane. Unsupervised learning is often the first step in data analysis because AI algorithms can pick up on trends which aren't apparent or logical to humans, allowing for deeper understanding. Imagine a set of millions of shopping orders, fed into an AI. The AI is told to sort them through creating profiles of different types of buyers, and thereby deciphers new parents, trend-followers, elderly, etc. This would be incredibly useful for companies, but the AI could just as easily sort things based on the color of items bought, or any other entirely irrelevant metric. The key to understanding unsupervised learning is that the AI picks up on patterns that it sees, not that make sense to humans.
+          </p>
+        </details>
       </div>
     </div>
   `;

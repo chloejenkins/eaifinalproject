@@ -135,7 +135,7 @@
 
   // ===== Sin Curve Road Generation =====
   const TRACK_LENGTH = 200;
-  const ROAD_WIDTH = 40; // pixels on each side of centerline
+  const ROAD_WIDTH_PIXELS = 45; // screen pixels on each side of centerline
   const ROAD_AMPLITUDE = 20;
   const ROAD_FREQUENCY = 0.2;
 
@@ -147,15 +147,48 @@
     return roadCenterlineAt(worldPos);
   }
 
+  function drawDetailedCar(ctx, x, y, color) {
+    // Draw detailed car (from above view, facing right)
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(Math.PI / 2); // Rotate 90 degrees to face right
+
+    // Main body
+    ctx.fillStyle = color;
+    ctx.fillRect(-8, -14, 16, 28);
+
+    // Cabin/windshield
+    ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+    ctx.fillRect(-6, -12, 12, 10);
+
+    // Headlights (yellow, front - now facing right)
+    ctx.fillStyle = '#ffff00';
+    ctx.beginPath();
+    ctx.arc(-4, -15, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(4, -15, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Taillights (red, back - now facing left)
+    ctx.fillStyle = '#ff0000';
+    ctx.beginPath();
+    ctx.arc(-4, 15, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(4, 15, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
   function isOnRoad(worldPos, carHeight) {
-      // Check if the car stays within the same white-line band shown on the track
       const roadCenterline = roadCenterlineAt(worldPos);
       const distance = Math.abs(carHeight - roadCenterline);
       const pad = 20;
       const range = 100;
-      const roadWidthPixels = 30;
       const worldUnitsPerPixel = range / ((trackCanvas.height / 2) - pad);
-      const roadWidthWorldUnits = roadWidthPixels * worldUnitsPerPixel;
+      const roadWidthWorldUnits = ROAD_WIDTH_PIXELS * worldUnitsPerPixel;
       return distance <= roadWidthWorldUnits;
   }
 
@@ -538,14 +571,13 @@
     const leftPoints = [];
     const rightPoints = [];
     const centerPoints = [];
-    const roadWidthPixels = 30;
 
     for (let screenX = pad; screenX <= w - pad; screenX += 1) {
       const worldPos = screenToWorld(screenX, centerWorldX, w, pad, viewportWorldUnits);
       const roadHeight = roadCenterlineAt(worldPos);
       const screenY = h/2 - (roadHeight / range) * (h/2 - pad);
-      leftPoints.push({x: screenX, y: screenY - roadWidthPixels});
-      rightPoints.push({x: screenX, y: screenY + roadWidthPixels});
+      leftPoints.push({x: screenX, y: screenY - ROAD_WIDTH_PIXELS});
+      rightPoints.push({x: screenX, y: screenY + ROAD_WIDTH_PIXELS});
       centerPoints.push({x: screenX, y: screenY});
     }
 
@@ -658,25 +690,16 @@
     if (mode === 'edit') {
       // Show preview car at slider height
       const previewScreenY = h/2 - (previewCarHeight / range) * (h/2 - pad);
-      trackCtx.fillStyle = '#00ffff';
       trackCtx.globalAlpha = 0.6;
-      trackCtx.beginPath();
-      trackCtx.roundRect ?
-        trackCtx.roundRect(carScreenX - 8, previewScreenY - 5, 16, 10, 2) :
-        trackCtx.rect(carScreenX - 8, previewScreenY - 5, 16, 10);
-      trackCtx.fill();
+      drawDetailedCar(trackCtx, carScreenX, previewScreenY, '#00ffff');
       trackCtx.globalAlpha = 1;
     } else {
       // Show car following regression in drive mode
       const carHeight = predictHeight(worldX);
       const carScreenY = h/2 - (carHeight / range) * (h/2 - pad);
       const onRoad = isOnRoad(worldX, carHeight);
-      trackCtx.fillStyle = onRoad ? '#00ffff' : '#ff0000';
-      trackCtx.beginPath();
-      trackCtx.roundRect ?
-        trackCtx.roundRect(carScreenX - 8, carScreenY - 5, 16, 10, 2) :
-        trackCtx.rect(carScreenX - 8, carScreenY - 5, 16, 10);
-      trackCtx.fill();
+      const carColor = onRoad ? '#00ffff' : '#ff0000';
+      drawDetailedCar(trackCtx, carScreenX, carScreenY, carColor);
     }
 
     // Show crash/completion message
