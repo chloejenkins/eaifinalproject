@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ai-concepts.html</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8f9fa;
+  --bg-panel:#ffffff;
+  --bg-inset:#f0f1f3;
+  --bg-raised:#ffffff;
+  --border:#e0e1e3;
+  --border-soft:#ececef;
+  --text:#2c2e31;
+  --text-dim:#666666;
+  --text-faint:#999999;
+  --accent:#4a90e2;
+  --accent-soft:#4a90e244;
+  --accent-2:#00c853;
+  --accent-2-soft:#00c85344;
+  --danger:#e74c3c;
+  --danger-soft:#e74c3c44;
+  --line-num:#aaaaaa;
+  --radius:8px;
+  --mono:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:14px;
+  line-height:1.6;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+::selection{ background:var(--accent-soft); color:var(--text); }
+
+a{ color:var(--accent-2); }
+
+/* ---------- Title bar ---------- */
+.titlebar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:16px 24px;
+  background:var(--bg-panel);
+  border-bottom:2px solid var(--border);
+}
+.dots{ display:none; }
+.dot{ display:none; }
+.titlebar .filename{
+  color:var(--text);
+  font-size:20px;
+  font-weight:600;
+  margin:0;
+}
+.titlebar .filename b{ color:var(--text); font-weight:600; }
+
+/* ---------- Tabs ---------- */
+.tabs{
+  display:flex;
+  background:var(--bg-panel);
+  border-bottom:2px solid var(--border);
+  overflow-x:auto;
+}
+.tab{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:14px 20px;
+  font-size:14px;
+  font-weight:500;
+  color:var(--text-dim);
+  background:transparent;
+  border:none;
+  border-bottom:3px solid transparent;
+  cursor:pointer;
+  white-space:nowrap;
+  user-select:none;
+  transition:all .2s ease;
+}
+.tab:hover{ color:var(--text); }
+.tab.active{
+  background:transparent;
+  color:var(--accent);
+  border-bottom:3px solid var(--accent);
+}
+.tab .tab-dot{
+  display:none;
+}
+.tab .tab-mark{
+  display:none;
+}
+
+/* ---------- Main ---------- */
+main{
+  flex:1;
+  background:var(--bg-panel);
+  padding:0;
+}
+.panel{ display:none; padding:28px clamp(16px,4vw,48px) 60px; max-width:1180px; margin:0 auto; }
+.panel.active{ display:block; }
+
+.eyebrow{
+  display:none;
+  color:var(--text-faint);
+  font-size:12px;
+  letter-spacing:.04em;
+  margin:0 0 4px;
+}
+h1.section-title{
+  font-size:28px;
+  font-weight:600;
+  margin:0 0 24px;
+  color:var(--text);
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+}
+h1.section-title .kw{ color:var(--text-dim); font-weight:400; font-size:16px; }
+h1.section-title .fn{ color:var(--text); }
+h1.section-title .punct{ display:none; }
+
+/* ---------- Commented code-block intro (signature element) ---------- */
+.code-block{
+  display:none;
+  background:var(--bg-inset);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  margin-bottom:26px;
+}
+.code-block .line{
+  display:flex;
+}
+.code-block .ln{
+  flex:0 0 44px;
+  text-align:right;
+  padding:2px 12px;
+  color:var(--line-num);
+  background:var(--bg-inset);
+  border-right:1px solid var(--border-soft);
+  user-select:none;
+  font-size:12.5px;
+}
+.code-block .code{
+  padding:2px 16px;
+  color:var(--text-dim);
+  font-size:13px;
+}
+.code-block .code .comment{ color:#6a7280; }
+.code-block .code .hl{ color:var(--accent); }
+.code-block .code .hl2{ color:var(--accent-2); }
+.code-block .line.blank .code::after{ content:"\00a0"; }
+
+/* ---------- Generic panels / cards ---------- */
+.card{
+  background:var(--bg-raised);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:24px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.04);
+}
+.grid-2{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+@media (max-width:820px){ .grid-2{ grid-template-columns:1fr; } }
+
+.console-label{
+  color:var(--text-dim);
+  font-size:13px;
+  margin-bottom:12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  font-weight:500;
+}
+.console-label .prompt{ display:none; }
+
+/* buttons */
+button.btn{
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--text-dim);
+  background:var(--bg-inset);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:10px 16px;
+  cursor:pointer;
+  transition:all .2s ease;
+  font-weight:500;
+}
+button.btn:hover{ background:#e8e9eb; border-color:var(--border); }
+button.btn:focus-visible, .tab:focus-visible, select:focus-visible, input:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+button.btn.primary{
+  background:var(--accent);
+  color:#ffffff;
+  border:none;
+}
+button.btn.primary:hover{ background:#3a7bc8; }
+button.btn.danger{ background:var(--danger); color:#ffffff; border:none; }
+button.btn.danger:hover{ background:#d43f2d; }
+button.btn:disabled{ opacity:.5; cursor:not-allowed; }
+button.btn.active-toggle{ background:var(--accent-2); color:#ffffff; border:none; }
+
+/* sliders */
+.field{ margin-bottom:18px; }
+.field label{
+  display:flex;
+  justify-content:space-between;
+  font-size:14px;
+  color:var(--text);
+  margin-bottom:8px;
+  font-weight:500;
+}
+.field label .val{ color:var(--accent); font-weight:600; }
+input[type=range]{
+  -webkit-appearance:none;
+  width:100%;
+  height:4px;
+  border-radius:2px;
+  background:var(--border);
+  outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:14px; height:14px; border-radius:50%;
+  background:var(--accent);
+  cursor:pointer;
+  border:2px solid var(--bg-inset);
+}
+input[type=range]::-moz-range-thumb{
+  width:14px; height:14px; border-radius:50%;
+  background:var(--accent);
+  cursor:pointer;
+  border:2px solid var(--bg-inset);
+}
+select, .text-input, input[type=text]{
+  font-family:var(--mono);
+  font-size:14px;
+  color:var(--text);
+  background:white;
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:10px 12px;
+  width:100%;
+  transition:border-color .2s ease;
+}
+select:hover, .text-input:hover, input[type=text]:hover{
+  border-color:#999999;
+}
+select:focus, .text-input:focus, input[type=text]:focus{
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(74,144,226,0.1);
+}
+.hint{ color:var(--text-dim); font-size:13px; margin-top:8px; line-height:1.5; }
+
+/* stat row */
+.stats{ display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+.stat{
+  background:var(--bg-inset);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:8px 12px;
+  min-width:110px;
+}
+.stat .k{ color:var(--text-faint); font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; }
+.stat .v{ color:var(--text); font-size:16px; font-weight:600; margin-top:2px; }
+.stat .v.accent{ color:var(--accent); }
+.stat .v.accent2{ color:var(--accent-2); }
+
+canvas{ display:block; max-width:100%; background:var(--bg-inset); border:1px solid var(--border); border-radius:var(--radius); }
+
+/* ---------- Status bar ---------- */
+.statusbar{
+  display:flex;
+  justify-content:space-between;
+  padding:8px 16px;
+  background:var(--bg-inset);
+  color:var(--text-dim);
+  font-size:12px;
+  font-weight:500;
+  border-top:1px solid var(--border);
+}
+.statusbar span{ opacity:.8; }
+.statusbar b{ opacity:1; color:var(--text); }
+
+/* ---------- Placeholder (unsupervised) ---------- */
+.placeholder{
+  border:1px dashed var(--border);
+  border-radius:var(--radius);
+  padding:40px 24px;
+  text-align:center;
+  color:var(--text-faint);
+}
+.placeholder .todo{
+  display:inline-block;
+  background:var(--danger-soft);
+  color:var(--danger);
+  font-size:11px;
+  padding:3px 8px;
+  border-radius:3px;
+  margin-bottom:14px;
+  letter-spacing:.04em;
+}
+
+/* small tag pills for sub-tab switcher */
+.subtabs{ display:flex; gap:8px; margin-bottom:20px; }
+.subtab{
+  font-family:var(--mono);
+  font-size:12.5px;
+  color:var(--text-dim);
+  background:var(--bg-inset);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:6px 14px;
+  cursor:pointer;
+}
+.subtab.active{ color:var(--bg-panel); background:var(--accent-2); border-color:var(--accent-2); font-weight:600; }
+.subpanel{ display:none; }
+.subpanel.active{ display:block; }
+
+/* rl layout */
+.rl-layout{ display:grid; grid-template-columns:minmax(0,660px) minmax(280px,1fr); gap:20px; align-items:start; }
+@media (max-width:960px){ .rl-layout{ grid-template-columns:1fr; } }
+.mode-toggle{ display:flex; gap:8px; margin-bottom:14px; }
+.legend{ display:flex; gap:14px; margin-top:10px; flex-wrap:wrap; }
+.legend .item{ display:flex; align-items:center; gap:6px; font-size:11.5px; color:var(--text-faint); }
+.legend .swatch{ width:10px; height:10px; border-radius:2px; }
+
+footer.hint-footer{ color:var(--text-faint); font-size:11.5px; margin-top:18px; border-top:1px solid var(--border-soft); padding-top:12px; }
+
+#rewardProgressContainer{ display:none; }
+</style>
+</head>
+<body>
+
+<div class="titlebar">
+  <div class="filename"><b>AI Driving Academy</b></div>
+</div>
+
+<div class="tabs" role="tablist" aria-label="AI concepts">
+  <div class="tab" data-tab="unsupervised" style="--tab-color:var(--accent-2)" role="tab" tabindex="0">
+    <span class="tab-dot"></span>Unsupervised<span class="tab-mark">●</span>
+  </div>
+  <div class="tab" data-tab="supervised" style="--tab-color:var(--accent)" role="tab" tabindex="0">
+    <span class="tab-dot"></span>Supervised<span class="tab-mark">●</span>
+  </div>
+  <div class="tab" data-tab="reinforcement" style="--tab-color:var(--danger)" role="tab" tabindex="0">
+    <span class="tab-dot"></span>Reinforcement<span class="tab-mark">●</span>
+  </div>
+</div>
+
+<main>
+
+  <!-- ============================================================ -->
+  <!-- UNSUPERVISED (placeholder, per request left undecided)        -->
+  <!-- ============================================================ -->
+  <section class="panel" id="panel-unsupervised">
+    <h1 class="section-title">Unsupervised Learning</h1>
+    <p style="font-size:15px; color:var(--text-dim); margin-bottom:20px;">Learning patterns without guidance</p>
+
+    <div id="unsupervised-root"></div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- SUPERVISED                                                     -->
+  <!-- ============================================================ -->
+  <section class="panel" id="panel-supervised">
+    <h1 class="section-title">Supervised Learning</h1>
+    <p style="font-size:15px; color:var(--text-dim); margin-bottom:20px;">Learning from labeled examples</p>
+
+    <div class="subtabs">
+      <div class="subtab active" data-sub="imitation">Imitation Driving</div>
+      <div class="subtab" data-sub="classification">Car Classification</div>
+    </div>
+
+    <!-- SUB 1: IMITATION -->
+    <div class="subpanel active" id="sub-imitation"></div>
+
+    <!-- SUB 2: CLASSIFICATION -->
+    <div class="subpanel" id="sub-classification"></div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- REINFORCEMENT                                                  -->
+  <!-- ============================================================ -->
+  <section class="panel" id="panel-reinforcement">
+    <h1 class="section-title">Reinforcement Learning</h1>
+    <p style="font-size:15px; color:var(--text-dim); margin-bottom:20px;">Learning through trial and reward</p>
+    <div id="rl-root"></div>
+  </section>
+
+</main>
+
+<div class="statusbar">
+  <span><b>AI Driving Academy</b></span>
+  <span id="statusTab" style="flex:1; text-align:right;">Unsupervised</span>
+</div>
+
+<script>
+/* ================= TAB SWITCHING ================= */
+const tabs = document.querySelectorAll('.tab');
+const panels = document.querySelectorAll('.panel');
+const statusTab = document.getElementById('statusTab');
+function activateTab(name){
+  tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===name));
+  panels.forEach(p=>p.classList.toggle('active', p.id==='panel-'+name));
+  statusTab.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+}
+tabs.forEach(t=>{
+  t.addEventListener('click', ()=>activateTab(t.dataset.tab));
+  t.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); activateTab(t.dataset.tab); } });
+});
+activateTab('unsupervised');
+
+/* ================= SUB-TAB SWITCHING (supervised) ================= */
+const subtabs = document.querySelectorAll('.subtab');
+const subpanels = document.querySelectorAll('.subpanel');
+subtabs.forEach(s=>{
+  s.addEventListener('click', ()=>{
+    subtabs.forEach(x=>x.classList.toggle('active', x===s));
+    subpanels.forEach(p=>p.classList.toggle('active', p.id==='sub-'+s.dataset.sub));
+  });
+});
+</script>
+
+<script src="unsupervised.js" onerror="console.warn('unsupervised.js failed to load')"></script>
+<script src="imitation.js" onerror="console.warn('imitation.js failed to load')"></script>
+<script src="classification.js" onerror="console.warn('classification.js failed to load')"></script>
+
+<script>
+// Reinforcement Learning Module - Inlined for compatibility
+try {
+  console.log('RL Script starting...');
+  (function(){
+    console.log('RL IIFE running');
+    const root = document.getElementById('rl-root');
+    console.log('Root element:', root);
+    if (!root) {
+      console.error('rl-root element not found');
+      return;
+    }
+    console.log('Root element found, injecting HTML');
+
+  root.innerHTML = `
+    <div class="code-block">
+      <div class="line"><span class="ln">1</span><span class="code comment">// reinforcement learning: no labels, no demonstrations -- just a track and a reward.</span></div>
+      <div class="line"><span class="ln">2</span><span class="code comment">// the car tries an action, sees what happens, and nudges its own value estimates.</span></div>
+      <div class="line"><span class="ln">3</span><span class="code comment">// repeat for a few hundred laps and steering starts to look like driving.</span></div>
+      <div class="line blank"><span class="ln">4</span><span class="code"></span></div>
+      <div class="line"><span class="ln">5</span><span class="code"><span class="hl">Q</span>(state, action) += alpha * (reward + gamma * <span class="hl2">max</span>(<span class="hl">Q</span>(nextState, ·)) - <span class="hl">Q</span>(state, action))</span></div>
+    </div>
+
+    <div class="rl-layout">
+      <div>
+        <div class="mode-toggle">
+          <button class="btn active-toggle" id="modeManualBtn">🚗 Manual Drive</button>
+          <button class="btn" id="modeTrainBtn">🧠 Train AI</button>
+        </div>
+
+        <canvas id="rlCanvas" width="640" height="440" aria-label="Car driving simulation"></canvas>
+
+        <div id="rewardProgressContainer" style="display:none;">
+          <div class="console-label" style="margin-top:16px;">Reward Progress</div>
+          <canvas id="rewardChart" width="640" height="110" aria-label="Episode reward over time"></canvas>
+        </div>
+
+        <div class="stats" id="rlStats"></div>
+      </div>
+
+      <div class="card">
+        <div class="field">
+          <label>Track</label>
+          <select id="trackSelect">
+            <option value="0">01 · Oval circuit</option>
+            <option value="1">02 · Figure eight</option>
+            <option value="2">03 · Serpentine</option>
+          </select>
+          <p class="hint">Switching tracks resets the car's position but keeps the Q-table — states are defined by what the sensors see, not by (x, y), so some learning can transfer.</p>
+        </div>
+
+        <div class="field" id="manualHint">
+          <label>Manual controls</label>
+          <p class="hint">← / → or A / D to steer, ↑ / ↓ to speed up / brake.</p>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="btn primary" id="startManualBtn" style="flex:1; font-size:14px; padding:12px;">▶ Start Driving</button>
+            <button class="btn" id="stopManualBtn" style="flex:1; font-size:14px; padding:12px; display:none;">⏹ Stop</button>
+          </div>
+          <div id="countdownDisplay" style="display:none; text-align:center; font-size:48px; font-weight:bold; color:var(--accent); padding:20px 0; font-family:monospace;">3</div>
+        </div>
+
+        <div id="trainControls" style="display:none;">
+          <div class="field">
+            <label>Episodes <span class="val" id="episodesVal">500</span></label>
+            <input type="range" id="episodesSlider" min="20" max="3000" step="20" value="500">
+          </div>
+          <div class="field">
+            <label>Epsilon decay</label>
+            <select id="decayTypeSelect">
+              <option value="none">None (constant)</option>
+              <option value="linear" selected>Linear</option>
+              <option value="exponential">Exponential</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Training speed</label>
+            <select id="speedSelect">
+              <option value="1">1× (real time)</option>
+              <option value="5" selected>5×</option>
+              <option value="20">20×</option>
+              <option value="100">100× (fast forward)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Car speed <span class="val" id="carSpeedVal">3.0</span></label>
+            <input type="range" id="carSpeedSlider" min="1.5" max="5" step="0.1" value="3">
+          </div>
+        </div>
+
+        <div class="mode-toggle" style="margin-top:16px;">
+          <button class="btn primary" id="startBtn" style="display:none;">▶ Start training</button>
+          <button class="btn" id="resetCarBtn">↺ Reset car</button>
+        </div>
+        <button class="btn danger" id="resetQBtn" style="display:none; margin-top:8px; width:100%;">⨯ Reset Q-table &amp; episodes</button>
+      </div>
+    </div>
+  `;
+
+  // Track geometry setup
+  const CX = 320, CY = 220;
+  function buildTrack(pointsFn, n, halfWidth){
+    const points = [];
+    for(let i=0;i<n;i++){ points.push(pointsFn(i/n)); }
+    const segLen = [], cum = [];
+    let total = 0;
+    for(let i=0;i<n;i++){
+      const a = points[i], b = points[(i+1)%n];
+      const l = Math.hypot(b.x-a.x, b.y-a.y);
+      cum.push(total);
+      segLen.push(l);
+      total += l;
+    }
+    return { points, segLen, cum, totalLength: total, halfWidth };
+  }
+
+  const TRACKS = [
+    buildTrack(t=>{ const a = t*Math.PI*2; return { x: CX + Math.cos(a)*250, y: CY + Math.sin(a)*160 }; }, 180, 34),
+    buildTrack(t=>{ const a = t*Math.PI*2; return { x: CX + Math.cos(a)*230, y: CY + Math.sin(a)*Math.cos(a)*1.6*230 }; }, 240, 30),
+    buildTrack(t=>{ const a = t*Math.PI*2; const r = 190 + Math.sin(a*5)*38; return { x: CX + Math.cos(a)*r, y: CY + Math.sin(a)*r*0.78 }; }, 240, 30),
+  ];
+
+  function nearestPointOnTrack(track, px, py){
+    const pts = track.points;
+    let best = { dist: Infinity, progress: 0, tangentAngle: 0 };
+    for(let i=0;i<pts.length;i++){
+      const a = pts[i], b = pts[(i+1)%pts.length];
+      const dx = b.x-a.x, dy = b.y-a.y;
+      const lenSq = dx*dx+dy*dy || 1e-6;
+      let t = ((px-a.x)*dx + (py-a.y)*dy)/lenSq;
+      t = Math.max(0, Math.min(1, t));
+      const cxp = a.x + t*dx, cyp = a.y + t*dy;
+      const dist = Math.hypot(px-cxp, py-cyp);
+      if(dist < best.dist){
+        best.dist = dist;
+        best.progress = track.cum[i] + t*track.segLen[i];
+        best.tangentAngle = Math.atan2(dy, dx);
+      }
+    }
+    return best;
+  }
+
+  const NUM_ACTIONS = 3;
+  const SENSOR_ANGLES = [-90,-45,0,45,90].map(d=>d*Math.PI/180);
+  const SENSOR_RANGE = 110, SENSOR_STEP = 6, SENSOR_BUCKETS = 5, HEADING_BUCKETS = 5;
+
+  function sensorReading(track, car, angleOffset){
+    for(let d=SENSOR_STEP; d<=SENSOR_RANGE; d+=SENSOR_STEP){
+      const px = car.x + Math.cos(car.angle+angleOffset)*d;
+      const py = car.y + Math.sin(car.angle+angleOffset)*d;
+      if(nearestPointOnTrack(track, px, py).dist > track.halfWidth) return d/SENSOR_RANGE;
+    }
+    return 1.0;
+  }
+
+  function normalizeAngle(a){
+    while(a > Math.PI) a -= Math.PI*2;
+    while(a < -Math.PI) a += Math.PI*2;
+    return a;
+  }
+
+  function getState(track, car){
+    const buckets = SENSOR_ANGLES.map(off=>{ const r = sensorReading(track, car, off); return Math.min(SENSOR_BUCKETS-1, Math.floor(r*SENSOR_BUCKETS)); });
+    const np = nearestPointOnTrack(track, car.x, car.y);
+    const diff = normalizeAngle(np.tangentAngle - car.angle);
+    const hBucket = Math.min(HEADING_BUCKETS-1, Math.floor((diff+Math.PI)/(2*Math.PI)*HEADING_BUCKETS));
+    return buckets.join('') + '_' + hBucket;
+  }
+
+  let qTable = new Map();
+  function getQ(state){ if(!qTable.has(state)) qTable.set(state, [0,0,0]); return qTable.get(state); }
+  function chooseAction(state, epsilon){
+    if(Math.random() < epsilon) return Math.floor(Math.random()*NUM_ACTIONS);
+    const q = getQ(state);
+    let best = 0;
+    for(let i=1;i<NUM_ACTIONS;i++) if(q[i] > q[best]) best = i;
+    return best;
+  }
+
+  let trackIndex = 0, track = TRACKS[trackIndex];
+  let car = { x:0, y:0, angle:0 };
+  let prevProgress = 0, episProgressAccum = 0, episReward = 0, episSteps = 0;
+  let episode = 0, epsilonCurrent = 1, bestReward = -Infinity, rewardHistory = [];
+  let mode = 'manual', trainingActive = false, paused = false;
+  let manualCrashes = 0, lastAction = 1, crashFlashUntil = 0;
+  let countdownActive = false, isCountingDown = false, countdownStartTime = 0;
+  const COUNTDOWN_DURATION = 3000;
+  let countdownFrameCounter = 0;
+  let countdownValue = 3;
+
+  function spawnCar(track){
+    const p0 = track.points[0], p1 = track.points[1];
+    car = { x:p0.x, y:p0.y, angle: Math.atan2(p1.y-p0.y, p1.x-p0.x) };
+    const np = nearestPointOnTrack(track, car.x, car.y);
+    prevProgress = np.progress;
+    episProgressAccum = 0;
+    episReward = 0;
+    episSteps = 0;
+  }
+  spawnCar(track);
+
+  function readParams(){
+    return {
+      episodes: +episodesSlider.value,
+      maxSteps: 500,
+      alpha: 0.3,
+      gamma: 0.9,
+      epsStart: 1.0,
+      epsMin: 0.01,
+      decayType: decayTypeSelect.value,
+      decayRate: 0.001,
+      trainingSpeed: +speedSelect.value,
+      speed: +carSpeedSlider.value,
+      turnRate: 0.1,
+    };
+  }
+
+  function updateEpsilon(params){
+    if(params.decayType === 'none') epsilonCurrent = params.epsStart;
+    else if(params.decayType === 'linear') epsilonCurrent = Math.max(params.epsMin, params.epsStart - (params.epsStart-params.epsMin)*(episode/params.episodes));
+    else epsilonCurrent = params.epsMin + (params.epsStart-params.epsMin)*Math.exp(-params.decayRate*episode);
+  }
+
+  function simulateStep(car, action, params){
+    const steer = action===0 ? -params.turnRate : action===2 ? params.turnRate : 0;
+    car.angle += steer;
+    car.x += Math.cos(car.angle)*params.speed;
+    car.y += Math.sin(car.angle)*params.speed;
+  }
+
+  function trainStepOnce(params){
+    const state = getState(track, car);
+    const action = chooseAction(state, epsilonCurrent);
+    lastAction = action;
+    simulateStep(car, action, params);
+
+    const np = nearestPointOnTrack(track, car.x, car.y);
+    let delta = np.progress - prevProgress;
+    if(delta < -track.totalLength/2) delta += track.totalLength;
+    else if(delta > track.totalLength/2) delta -= track.totalLength;
+    prevProgress = np.progress;
+
+    let reward = delta*1.0 - 0.02;
+    let done = false;
+    if(np.dist > track.halfWidth){ reward = -50; done = true; }
+    else { episProgressAccum += delta; if(episProgressAccum >= track.totalLength){ reward += 100; done = true; } }
+    episReward += reward;
+    episSteps++;
+
+    const doneFinal = done || episSteps >= params.maxSteps;
+    const nextState = getState(track, car);
+    const q = getQ(state);
+    const maxNext = doneFinal ? 0 : Math.max(...getQ(nextState));
+    q[action] += params.alpha * (reward + params.gamma*maxNext - q[action]);
+
+    if(doneFinal){
+      rewardHistory.push(episReward);
+      if(episReward > bestReward) bestReward = episReward;
+      episode++;
+      updateEpsilon(params);
+      spawnCar(track);
+      if(episode >= params.episodes){ trainingActive = false; startBtn.textContent = '▶ Start training'; }
+    }
+  }
+
+  const keys = { left:false, right:false, up:false, down:false };
+  window.addEventListener('keydown', e=>{
+    if(!document.getElementById('panel-reinforcement').classList.contains('active')) return;
+    if(mode !== 'manual') return;
+    if(e.key==='ArrowLeft'||e.key==='a') keys.left = true;
+    if(e.key==='ArrowRight'||e.key==='d') keys.right = true;
+    if(e.key==='ArrowUp'||e.key==='w') keys.up = true;
+    if(e.key==='ArrowDown'||e.key==='s') keys.down = true;
+  });
+  window.addEventListener('keyup', e=>{
+    if(e.key==='ArrowLeft'||e.key==='a') keys.left = false;
+    if(e.key==='ArrowRight'||e.key==='d') keys.right = false;
+    if(e.key==='ArrowUp'||e.key==='w') keys.up = false;
+    if(e.key==='ArrowDown'||e.key==='s') keys.down = false;
+  });
+
+  function updateManualCar(params){
+    if(countdownActive) return;
+    const steer = (keys.right?1:0) - (keys.left?1:0);
+    car.angle += steer*params.turnRate;
+    let spd = params.speed;
+    if(keys.up) spd *= 1.6;
+    if(keys.down) spd *= 0.5;
+    car.x += Math.cos(car.angle)*spd;
+    car.y += Math.sin(car.angle)*spd;
+    const np = nearestPointOnTrack(track, car.x, car.y);
+    if(np.dist > track.halfWidth){ manualCrashes++; crashFlashUntil = performance.now() + 700; spawnCar(track); countdownActive = true; isCountingDown = true; countdownStartTime = Date.now(); countdownDisplay.style.display = 'block'; countdownDisplay.textContent = '3'; stopManualBtn.style.display = 'block'; }
+  }
+
+  const canvas = document.getElementById('rlCanvas');
+  if (!canvas) {
+    console.error('Canvas element not found!');
+    return;
+  }
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    console.error('Failed to get canvas context!');
+    return;
+  }
+  console.log('Canvas initialized successfully', canvas, ctx);
+  ctx.fillStyle = '#2d5016';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  console.log('Filled canvas with green');
+
+  function drawTrack(track){
+    const pts = track.points;
+    const outerPts = [], innerPts = [];
+    for (let i = 0; i < pts.length; i++) {
+      const p = pts[i], p_prev = pts[(i - 1 + pts.length) % pts.length], p_next = pts[(i + 1) % pts.length];
+      const dx1 = p.x - p_prev.x, dy1 = p.y - p_prev.y, dx2 = p_next.x - p.x, dy2 = p_next.y - p.y;
+      const len1 = Math.sqrt(dx1*dx1 + dy1*dy1) || 1, len2 = Math.sqrt(dx2*dx2 + dy2*dy2) || 1;
+      const nx1 = -dy1 / len1, ny1 = dx1 / len1, nx2 = -dy2 / len2, ny2 = dx2 / len2;
+      const nx = (nx1 + nx2) / 2, ny = (ny1 + ny2) / 2, len = Math.sqrt(nx*nx + ny*ny) || 1;
+      outerPts.push({ x: p.x + (nx/len) * track.halfWidth, y: p.y + (ny/len) * track.halfWidth });
+      innerPts.push({ x: p.x - (nx/len) * track.halfWidth, y: p.y - (ny/len) * track.halfWidth });
+    }
+    ctx.fillStyle = '#666666';
+    ctx.beginPath();
+    ctx.moveTo(outerPts[0].x, outerPts[0].y);
+    for (let i = 1; i < outerPts.length; i++) ctx.lineTo(outerPts[i].x, outerPts[i].y);
+    for (let i = innerPts.length - 1; i >= 0; i--) ctx.lineTo(innerPts[i].x, innerPts[i].y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(outerPts[0].x, outerPts[0].y);
+    for (let i = 1; i < outerPts.length; i++) ctx.lineTo(outerPts[i].x, outerPts[i].y);
+    ctx.lineTo(outerPts[0].x, outerPts[0].y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(innerPts[0].x, innerPts[0].y);
+    for (let i = 1; i < innerPts.length; i++) ctx.lineTo(innerPts[i].x, innerPts[i].y);
+    ctx.lineTo(innerPts[0].x, innerPts[0].y);
+    ctx.stroke();
+    ctx.strokeStyle = '#ffff00';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([8, 8]);
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+    ctx.lineTo(pts[0].x, pts[0].y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+
+  function drawCar(car, color){
+    ctx.save();
+    ctx.translate(car.x, car.y);
+    ctx.rotate(car.angle + Math.PI / 2);
+    ctx.fillStyle = color;
+    ctx.fillRect(-8, -14, 16, 28);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.fillRect(-6, -12, 12, 10);
+    ctx.fillStyle = '#ffff00';
+    ctx.beginPath();
+    ctx.arc(-4, -15, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(4, -15, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#ff0000';
+    ctx.beginPath();
+    ctx.arc(-4, 15, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(4, 15, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawSensors(track, car){
+    SENSOR_ANGLES.forEach(off=>{ const r = sensorReading(track, car, off); const dist = r*SENSOR_RANGE; const hit = r < 1.0; ctx.strokeStyle = hit ? '#e2694b' : '#4fb3a955'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(car.x, car.y); ctx.lineTo(car.x+Math.cos(car.angle+off)*dist, car.y+Math.sin(car.angle+off)*dist); ctx.stroke(); });
+  }
+
+  function drawScene(){
+    ctx.fillStyle = '#2d5016';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const zoom = 1.2;
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.scale(zoom, zoom);
+    ctx.translate(-car.x, -car.y);
+    drawTrack(track);
+    // ALWAYS update countdown display
+    if(countdownDisplay.style.display !== 'none'){
+      const now = Date.now();
+      const elapsed = now - countdownStartTime;
+      const remaining = Math.max(0, Math.ceil((3000 - elapsed) / 1000));
+      if(remaining !== parseInt(countdownDisplay.textContent)){
+        console.log('Countdown update:', remaining, 'elapsed:', elapsed, 'startTime:', countdownStartTime, 'now:', now);
+      }
+      countdownDisplay.textContent = remaining;
+      if(remaining === 0){
+        console.log('Countdown complete!');
+        isCountingDown = false;
+        countdownActive = false;
+        countdownDisplay.style.display = 'none';
+        startManualBtn.style.display = 'block';
+        stopManualBtn.style.display = 'none';
+      }
+    }
+    const flashing = performance.now() < crashFlashUntil;
+    const color = flashing ? '#e2694b' : (mode==='manual' ? '#e2a72e' : '#4fb3a9');
+    drawCar(car, color);
+    ctx.restore();
+  }
+
+  function drawChart(){
+    const c = document.getElementById('rewardChart');
+    const cctx = c.getContext('2d');
+    const w = c.width, h = c.height;
+    cctx.clearRect(0,0,w,h);
+    if(rewardHistory.length===0) return;
+    const n = rewardHistory.length;
+    const bucket = Math.max(1, Math.ceil(n/w));
+    const pts = [];
+    for(let i=0;i<n;i+=bucket){ const slice = rewardHistory.slice(i,i+bucket); pts.push(slice.reduce((a,b)=>a+b,0)/slice.length); }
+    const minV = Math.min(...pts, 0), maxV = Math.max(...pts, 1);
+    const zeroY = h - ((0-minV)/((maxV-minV)||1))*h;
+    cctx.strokeStyle = '#33383f';
+    cctx.setLineDash([4,4]);
+    cctx.beginPath(); cctx.moveTo(0,zeroY); cctx.lineTo(w,zeroY); cctx.stroke();
+    cctx.setLineDash([]);
+    cctx.strokeStyle = '#4fb3a9';
+    cctx.lineWidth = 1.5;
+    cctx.beginPath();
+    pts.forEach((v,i)=>{ const x = i/((pts.length-1)||1)*w; const y = h - ((v-minV)/((maxV-minV)||1))*h; if(i===0) cctx.moveTo(x,y); else cctx.lineTo(x,y); });
+    cctx.stroke();
+  }
+
+  function updateStatsUI(params){
+    const el = document.getElementById('rlStats');
+    if(mode==='train'){
+      el.innerHTML = `<div class="stat"><div class="k">Episode</div><div class="v accent">${episode} / ${params.episodes}</div></div><div class="stat"><div class="k">Epsilon</div><div class="v">${epsilonCurrent.toFixed(3)}</div></div><div class="stat"><div class="k">Reward (this ep.)</div><div class="v">${episReward.toFixed(1)}</div></div><div class="stat"><div class="k">Best reward</div><div class="v accent2">${bestReward===-Infinity?'—':bestReward.toFixed(1)}</div></div><div class="stat"><div class="k">States seen</div><div class="v">${qTable.size}</div></div>`;
+    } else {
+      el.innerHTML = `<div class="stat"><div class="k">Mode</div><div class="v accent">Manual</div></div><div class="stat"><div class="k">Crashes</div><div class="v">${manualCrashes}</div></div><div class="stat"><div class="k">Q-table size</div><div class="v">${qTable.size}</div></div>`;
+    }
+  }
+
+  const episodesSlider = document.getElementById('episodesSlider');
+  const epsStartSlider = document.getElementById('epsStartSlider');
+  const epsMinSlider = document.getElementById('epsMinSlider');
+  const decayTypeSelect = document.getElementById('decayTypeSelect');
+  const decayRateSlider = document.getElementById('decayRateSlider');
+  const decayRateField = document.getElementById('decayRateField');
+  const speedSelect = document.getElementById('speedSelect');
+  const carSpeedSlider = document.getElementById('carSpeedSlider');
+  const turnRateSlider = document.getElementById('turnRateSlider');
+  const trackSelect = document.getElementById('trackSelect');
+  const modeManualBtn = document.getElementById('modeManualBtn');
+  const modeTrainBtn = document.getElementById('modeTrainBtn');
+  const startBtn = document.getElementById('startBtn');
+  const startManualBtn = document.getElementById('startManualBtn');
+  const stopManualBtn = document.getElementById('stopManualBtn');
+  console.log('Starting element selections...');
+  const countdownDisplay = document.getElementById('countdownDisplay');
+  console.log('countdownDisplay:', countdownDisplay);
+  const resetCarBtn = document.getElementById('resetCarBtn');
+  const resetQBtn = document.getElementById('resetQBtn');
+  const trainControls = document.getElementById('trainControls');
+  const manualHint = document.getElementById('manualHint');
+  console.log('Element selections done');
+
+  const labelPairs = [
+    [episodesSlider,'episodesVal', v=>v],
+    [carSpeedSlider,'carSpeedVal', v=>(+v).toFixed(1)],
+  ];
+  labelPairs.forEach(([slider,labelId,fmt])=>{ if(slider) { const label = document.getElementById(labelId); if(label) slider.addEventListener('input', ()=>{ label.textContent = fmt(slider.value); }); } });
+  decayTypeSelect.addEventListener('change', ()=>{ decayRateField.style.display = decayTypeSelect.value==='exponential' ? '' : 'none'; });
+  trackSelect.addEventListener('change', ()=>{ trackIndex = +trackSelect.value; track = TRACKS[trackIndex]; spawnCar(track); });
+
+  function switchMode(newMode){
+    mode = newMode;
+    modeManualBtn.classList.toggle('active-toggle', mode==='manual');
+    modeTrainBtn.classList.toggle('active-toggle', mode==='train');
+    manualHint.style.display = mode==='manual' ? '' : 'none';
+    trainControls.style.display = mode==='train' ? '' : 'none';
+    startBtn.style.display = mode==='train' ? '' : 'none';
+    resetQBtn.style.display = mode==='train' ? '' : 'none';
+    startManualBtn.style.display = mode==='manual' ? 'block' : 'none';
+    stopManualBtn.style.display = 'none';
+    const rewardProgressContainer = document.getElementById('rewardProgressContainer');
+    if (rewardProgressContainer) { rewardProgressContainer.style.display = mode==='train' ? 'block' : 'none'; }
+    countdownActive = true;
+    isCountingDown = false;
+    countdownDisplay.style.display = 'none';
+  }
+  console.log('Setting up mode buttons...');
+  modeManualBtn.addEventListener('click', ()=>switchMode('manual'));
+  modeTrainBtn.addEventListener('click', ()=>switchMode('train'));
+  switchMode('manual');
+  console.log('Mode buttons set up');
+  // Force-ensure buttons are visible on startup
+  startManualBtn.style.display = 'block';
+  stopManualBtn.style.display = 'none';
+  countdownDisplay.style.display = 'none';
+  console.log('Forced button visibility:', {startBtn: startManualBtn.style.display, stopBtn: stopManualBtn.style.display, countdown: countdownDisplay.style.display});
+  setTimeout(()=>{
+    const computed = window.getComputedStyle(startManualBtn);
+    console.log('After 100ms, computed display:', computed.display, 'inline style:', startManualBtn.style.display, 'parent display:', window.getComputedStyle(startManualBtn.parentElement).display);
+  }, 100);
+
+  startBtn.addEventListener('click', ()=>{ const params = readParams(); if(!trainingActive){ trainingActive = true; paused = false; startBtn.textContent = '⏸ Pause'; updateEpsilon(params); } else { paused = !paused; startBtn.textContent = paused ? '▶ Resume' : '⏸ Pause'; } });
+  resetCarBtn.addEventListener('click', ()=>{ spawnCar(track); countdownActive = false; countdownDisplay.style.display = 'none'; });
+  startManualBtn.addEventListener('click', ()=>{ countdownActive = true; isCountingDown = true; countdownStartTime = Date.now(); countdownDisplay.style.display = 'block'; countdownDisplay.textContent = '3'; startManualBtn.style.display = 'none'; });
+  stopManualBtn.addEventListener('click', ()=>{ countdownActive = true; isCountingDown = false; countdownDisplay.style.display = 'none'; startManualBtn.style.display = 'block'; stopManualBtn.style.display = 'none'; spawnCar(track); });
+  resetQBtn.addEventListener('click', ()=>{ qTable = new Map(); episode = 0; bestReward = -Infinity; rewardHistory = []; manualCrashes = 0; trainingActive = false; paused = false; startBtn.textContent = '▶ Start training'; epsilonCurrent = +epsStartSlider.value; spawnCar(track); });
+  console.log('Event listeners set up, about to define loop');
+
+  let loopCount = 0;
+  function loop(){
+    loopCount++;
+    if(loopCount % 60 === 0) console.log('Loop running, count:', loopCount);
+    const panel = document.getElementById('panel-reinforcement');
+    if(panel && panel.classList.contains('active')){
+      const params = readParams();
+      if(mode==='train' && trainingActive && !paused){ for(let i=0;i<params.trainingSpeed;i++){ if(!trainingActive) break; trainStepOnce(params); } }
+      else if(mode==='manual'){ updateManualCar(params); }
+      drawScene();
+      drawChart();
+      updateStatsUI(params);
+    } else {
+      try {
+        drawScene();
+      } catch(e) {
+        console.error('drawScene error:', e);
+      }
+    }
+    if(typeof requestAnimationFrame !== 'undefined') {
+      requestAnimationFrame(loop);
+    } else {
+      setTimeout(loop, 16);
+    }
+  }
+  console.log('Starting animation loop...');
+  if(typeof requestAnimationFrame !== 'undefined') {
+    requestAnimationFrame(loop);
+  } else {
+    console.log('requestAnimationFrame not available, using setTimeout');
+    setTimeout(loop, 16);
+  }
+  })();
+} catch(e) {
+  console.error('RL Script error:', e);
+  document.getElementById('rl-root').innerHTML = '<div style="color:red;">Error initializing: ' + e.message + '</div>';
+}
+</script>
+</body>
+</html>
